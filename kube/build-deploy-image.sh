@@ -3,7 +3,7 @@
 # 2. Upload the image to our repository if registry env variables are defined
 set -e
 
-DOCKER_IMAGE_NAME=kabanero-landing
+DOCKER_IMAGE_NAME=kabanero-landing 
 NAMESPACE=/r/kidus60/kabanero
 
 CUR_DIR="$(cd $(dirname $0) && pwd)"
@@ -19,7 +19,6 @@ docker build -t "$DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG" -f "$CUR_DIR"/Dockerfile 
 # publish to a registry
 if [ -n "$DOCKER_REGISTRY" ] && [ -n "$DOCKER_REGISTRY_USER" ] && [ -n "$DOCKER_REGISTRY_PASSWORD" ]; then
     docker login "--username=${DOCKER_REGISTRY_USER}" "--password=${DOCKER_REGISTRY_PASSWORD}" "${DOCKER_REGISTRY}"
-docker build -t $IMAGE_NAME:$TAG .
-docker tag $IMAGE_NAME:$TAG $DOCKER_REGISTRY/$IMAGE_NAME:$TAG
+
 docker push $DOCKER_REGISTRY/$IMAGE_NAME
 fi
