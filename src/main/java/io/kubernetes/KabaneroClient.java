@@ -111,7 +111,7 @@ public class KabaneroClient {
      * 
      * @return whether or not changes were made in the namespace
      */
-    private static boolean refreshApiClient() throws IOException, GeneralSecurityException, ApiException {
+    private static boolean refreshInstance() throws IOException, GeneralSecurityException, ApiException {
         ApiClient client = KabaneroClient.getApiClient();
 
         CoreV1Api api = new CoreV1Api(client);
@@ -134,7 +134,7 @@ public class KabaneroClient {
     }
 
     public static boolean isOld() throws IOException, GeneralSecurityException, ApiException {
-        return KabaneroClient.refreshApiClient();
+        return KabaneroClient.refreshInstance();
     }
 
     public static List<KabaneroInstance> getInstances() throws IOException, ApiException, GeneralSecurityException {
