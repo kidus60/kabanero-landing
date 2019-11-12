@@ -17,3 +17,5 @@ else
 fi
 
 docker build $DOCKER_OPTS --pull --build-arg GIT_REVISION=$GIT_REVISION -t "$DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG" .
+
+docker run -p 9443:9443 -v ~/.kube/config:/root/.kube/config -u 0 landing:latest
