@@ -19,29 +19,27 @@
 
 package io.kabanero;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.HashMap;
 
 import io.website.Constants;
 import io.kubernetes.KabaneroClient;
+import io.kubernetes.client.ApiException;
 
 // Singleton class to manage the various tools associated with Kabanero
 public class KabaneroToolManager {
 
     private static KabaneroToolManager SINGLE_TOOL_MANAGER_INSTANCE;
     private HashMap<String, KabaneroTool> KABANERO_TOOLS = new HashMap<String, KabaneroTool>();
-    private long created = System.currentTimeMillis();
 
     private KabaneroToolManager() {
     }
 
-    private boolean isOld() {
-        return (System.currentTimeMillis() - SINGLE_TOOL_MANAGER_INSTANCE.created > 1000 * 60 * 5);
-    }
-    
-    public static synchronized KabaneroToolManager getKabaneroToolManagerInstance() {
-        // quick hack: isOld will force refresh every so often - we should be watching for changes instead
-        if(SINGLE_TOOL_MANAGER_INSTANCE == null || SINGLE_TOOL_MANAGER_INSTANCE.isOld()) {
+    public static synchronized KabaneroToolManager getKabaneroToolManagerInstance() throws IOException, GeneralSecurityException, ApiException {
+        
+        if(SINGLE_TOOL_MANAGER_INSTANCE == null ||  KabaneroClient.isOld()) {
             SINGLE_TOOL_MANAGER_INSTANCE = new KabaneroToolManager();
             
             try {

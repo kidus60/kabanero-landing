@@ -27,9 +27,12 @@ import io.kubernetes.KubeKabanero;
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
 import io.kubernetes.client.Configuration;
+import io.kubernetes.client.apis.CoreV1Api;
 import io.kubernetes.client.apis.CustomObjectsApi;
+import io.kubernetes.client.models.V1Event;
 import io.kubernetes.client.util.ClientBuilder;
 import io.kubernetes.client.util.KubeConfig;
+import io.kubernetes.client.util.Watch;
 
 import java.io.File;
 import java.io.FileReader;
@@ -42,6 +45,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,6 +53,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import com.google.common.reflect.TypeToken;
 import com.squareup.okhttp.ConnectionSpec;
 
 public class KabaneroClient {
@@ -95,8 +100,41 @@ public class KabaneroClient {
         ConnectionSpec spec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS).allEnabledCipherSuites().build();
         client.getHttpClient().setConnectionSpecs(Collections.singletonList((spec)));
 
+        client.getHttpClient().setReadTimeout(0, TimeUnit.SECONDS); // infinite timeout
+
         Configuration.setDefaultApiClient(client);
         return client;
+    }
+
+    /**
+     * Using the Watch API to watch for changes in the kabanero namespace.
+     * 
+     * @return whether or not changes were made in the namespace
+     */
+    private static boolean refreshApiClient() throws IOException, GeneralSecurityException, ApiException {
+        ApiClient client = KabaneroClient.getApiClient();
+
+        CoreV1Api api = new CoreV1Api(client);
+
+        Watch<V1Event> watch = Watch.createWatch(client,
+                api.listNamespaceCall(null, null, null, null, null, 5, null, null, Boolean.TRUE, null, null),
+                new TypeToken<Watch.Response<V1Event>>() {
+                }.getType());
+
+        try {
+            for (Watch.Response<V1Event> item : watch) {
+                if (item.type != null) {
+                    return true;
+                }
+            }
+        } finally {
+            watch.close();
+        }
+        return false;
+    }
+
+    public static boolean isOld() throws IOException, GeneralSecurityException, ApiException {
+        return KabaneroClient.refreshApiClient();
     }
 
     public static List<KabaneroInstance> getInstances() throws IOException, ApiException, GeneralSecurityException {
@@ -121,8 +159,9 @@ public class KabaneroClient {
 
             String clusterName = null;
 
-            KabaneroInstance kabInst = new KabaneroInstance(username, instanceName, date, kabaneroRepositories, clusterName, kabaneroCollections, cliURL);
-            LOGGER.log(Level.FINE, "Kabanero Instance: {0}: {1}", new Object[]{ kabInst.getInstanceName(), kabInst});
+            KabaneroInstance kabInst = new KabaneroInstance(username, instanceName, date, kabaneroRepositories,
+                    clusterName, kabaneroCollections, cliURL);
+            LOGGER.log(Level.FINE, "Kabanero Instance: {0}: {1}", new Object[] { kabInst.getInstanceName(), kabInst });
 
             kabaneroInstances.add(kabInst);
         }
@@ -137,7 +176,8 @@ public class KabaneroClient {
         return null;
     }
 
-    public static void discoverTools(KabaneroToolManager tools) throws IOException, ApiException, GeneralSecurityException {
+    public static void discoverTools(KabaneroToolManager tools)
+            throws IOException, ApiException, GeneralSecurityException {
         ApiClient client = KabaneroClient.getApiClient();
 
         Map<String, Route> routes = null;
@@ -161,7 +201,8 @@ public class KabaneroClient {
         }
     }
 
-    private static List<KabaneroCollection> listKabaneroCollections(ApiClient apiClient, String namespace) throws ApiException {
+    private static List<KabaneroCollection> listKabaneroCollections(ApiClient apiClient, String namespace)
+            throws ApiException {
         CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
         String group = "kabanero.io";
         String version = "v1alpha1";
@@ -237,7 +278,7 @@ public class KabaneroClient {
             route.setSpec(spec);
         }
 
-        LOGGER.log(Level.FINE, namespace + " namespace has {0} routes: {1}", new Object[]{routes.size(), routes});
+        LOGGER.log(Level.FINE, namespace + " namespace has {0} routes: {1}", new Object[] { routes.size(), routes });
         return routes;
     }
 

@@ -19,6 +19,8 @@
 
 package io.kabanero;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +29,7 @@ import java.util.logging.Logger;
 
 import io.website.Constants;
 import io.kubernetes.KabaneroClient;
+import io.kubernetes.client.ApiException;
 
 // Singleton class to manage the various kabanero instances associated with Kabanero
 public class KabaneroManager {
@@ -34,18 +37,13 @@ public class KabaneroManager {
 
     private static KabaneroManager SINGLE_KABANERO_MANAGER_INSTANCE;
     private HashMap<String, KabaneroInstance> KABANERO_INSTANCES = new HashMap<String, KabaneroInstance>();
-    private long created = System.currentTimeMillis();
 
     private KabaneroManager() {
     }
 
-    private boolean isOld() {
-        return (System.currentTimeMillis() - SINGLE_KABANERO_MANAGER_INSTANCE.created > 1000 * 60 * 5);
-    }
-    
-    public static synchronized KabaneroManager getKabaneroManagerInstance() {
-        // quick hack: isOld will force refresh every so often - we should be watching for changes instead
-        if(SINGLE_KABANERO_MANAGER_INSTANCE == null || SINGLE_KABANERO_MANAGER_INSTANCE.isOld()) {
+    public static synchronized KabaneroManager getKabaneroManagerInstance() throws IOException, GeneralSecurityException, ApiException {
+
+        if(SINGLE_KABANERO_MANAGER_INSTANCE == null || KabaneroClient.isOld()) {
             SINGLE_KABANERO_MANAGER_INSTANCE = new KabaneroManager();
 
             try {
