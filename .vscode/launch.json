@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - KabaneroClient",
+            "request": "launch",
+            "mainClass": "io.kubernetes.KabaneroClient",
+            "projectName": "kabanero-landing"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - KabaneroManager",
+            "request": "launch",
+            "mainClass": "io.kabanero.KabaneroManager",
+            "projectName": "kabanero-landing"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - KabaneroManager",
+            "request": "launch",
+            "mainClass": "io.kabanero.KabaneroManager",
+            "projectName": "kabanero-website"
+        }
+    ]
+}
