@@ -159,8 +159,7 @@ public class KabaneroClient {
 
             String clusterName = null;
 
-            KabaneroInstance kabInst = new KabaneroInstance(username, instanceName, date, kabaneroRepositories,
-                    clusterName, kabaneroCollections, cliURL);
+            KabaneroInstance kabInst = new KabaneroInstance(username, instanceName, date, kabaneroRepositories, clusterName, kabaneroCollections, cliURL);
             LOGGER.log(Level.FINE, "Kabanero Instance: {0}: {1}", new Object[] { kabInst.getInstanceName(), kabInst });
 
             kabaneroInstances.add(kabInst);
@@ -176,8 +175,7 @@ public class KabaneroClient {
         return null;
     }
 
-    public static void discoverTools(KabaneroToolManager tools)
-            throws IOException, ApiException, GeneralSecurityException {
+    public static void discoverTools(KabaneroToolManager tools) throws IOException, ApiException, GeneralSecurityException {
         ApiClient client = KabaneroClient.getApiClient();
 
         Map<String, Route> routes = null;
@@ -201,8 +199,7 @@ public class KabaneroClient {
         }
     }
 
-    private static List<KabaneroCollection> listKabaneroCollections(ApiClient apiClient, String namespace)
-            throws ApiException {
+    private static List<KabaneroCollection> listKabaneroCollections(ApiClient apiClient, String namespace) throws ApiException {
         CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
         String group = "kabanero.io";
         String version = "v1alpha1";
