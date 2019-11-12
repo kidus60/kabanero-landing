@@ -30,10 +30,7 @@ import io.kubernetes.client.Configuration;
 import io.kubernetes.client.apis.CoreV1Api;
 import io.kubernetes.client.apis.CustomObjectsApi;
 import io.kubernetes.client.models.V1Event;
-import io.kubernetes.client.models.V1EventList;
-import io.kubernetes.client.models.V1Namespace;
 import io.kubernetes.client.util.ClientBuilder;
-import io.kubernetes.client.util.Config;
 import io.kubernetes.client.util.KubeConfig;
 import io.kubernetes.client.util.Watch;
 
@@ -97,48 +94,36 @@ public class KabaneroClient {
 
         // use the same key manager as kube client
         sc.init(client.getKeyManagers(), KabaneroClient.getTrustManager(), new SecureRandom());
-        
 
         client.getHttpClient().setSslSocketFactory(sc.getSocketFactory());
-        
+
         ConnectionSpec spec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS).allEnabledCipherSuites().build();
         client.getHttpClient().setConnectionSpecs(Collections.singletonList((spec)));
-        
+
         client.getHttpClient().setReadTimeout(0, TimeUnit.SECONDS); // infinite timeout
 
         Configuration.setDefaultApiClient(client);
         return client;
     }
 
-
-    public static void main(String[] args) throws IOException, GeneralSecurityException, ApiException {
-         old();
-     }
-
     /**
      * Using the Watch API to watch for changes in the kabanero namespace.
+     * 
      * @return whether or not changes were made in the namespace
      */
-    private static boolean old() throws IOException, GeneralSecurityException, ApiException {
+    private static boolean refreshApiClient() throws IOException, GeneralSecurityException, ApiException {
         ApiClient client = KabaneroClient.getApiClient();
-    
+
         CoreV1Api api = new CoreV1Api(client);
-    
 
-        String namespace = "kabanero";
-        Boolean watchForChanges = true;
+        Watch<V1Event> watch = Watch.createWatch(client,
+                api.listNamespaceCall(null, null, null, null, null, 5, null, null, Boolean.TRUE, null, null),
+                new TypeToken<Watch.Response<V1Event>>() {
+                }.getType());
 
-        Watch<V1Event> watch =
-        Watch.createWatch(
-            client,
-            api.listNamespacedEventCall(namespace, true, "true", null, null, null, 5, null, null, watchForChanges, null, null),
-            new TypeToken<Watch.Response<V1Event>>() {}.getType());
-            
         try {
             for (Watch.Response<V1Event> item : watch) {
                 if (item.type != null) {
-                    System.out.printf("%s : %s%n", item.type, item.object);
-                    LOGGER.log(null, item.type, item);
                     return true;
                 }
             }
@@ -149,7 +134,7 @@ public class KabaneroClient {
     }
 
     public static boolean isOld() throws IOException, GeneralSecurityException, ApiException {
-        return KabaneroClient.old();
+        return KabaneroClient.refreshApiClient();
     }
 
     public static List<KabaneroInstance> getInstances() throws IOException, ApiException, GeneralSecurityException {
