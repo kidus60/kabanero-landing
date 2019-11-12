@@ -17,7 +17,7 @@
  *
  ******************************************************************************/
 
-package io.kabanero;
+package io.kabanero.instance;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;

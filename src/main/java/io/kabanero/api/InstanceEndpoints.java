@@ -16,7 +16,7 @@
  *
  ******************************************************************************/
 
-package io.kabanero;
+package io.kabanero.api;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -33,6 +33,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import io.kubernetes.client.ApiException;
+import io.kabanero.instance.KabaneroInstance;
+import io.kabanero.instance.KabaneroManager;
 import io.website.ResponseMessage;
 
 @ApplicationPath("api")

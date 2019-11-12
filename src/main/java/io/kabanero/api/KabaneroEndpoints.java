@@ -1,4 +1,3 @@
-
 /******************************************************************************
  *
  * Copyright 2019 IBM Corporation and others.
@@ -17,31 +16,30 @@
  *
  ******************************************************************************/
 
-package io.kabanero;
+package io.kabanero.api;
 
-public class KabaneroTool {
+import javax.enterprise.context.RequestScoped;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.MediaType;
 
-    public String label;
-    public String location;
-    
-    public KabaneroTool(String label, String location){
-        this.label = label;
-        this.location = location;
-    }
+import io.kabanero.KabaneroInstallation;
 
-    public String getLabel() {
-        return label;
-    }
+/*
+    Endpoints related to the Kabanero installation as a whole
+*/
+@ApplicationPath("api")
+@Path("/kabanero")
+@RequestScoped
+public class KabaneroEndpoints extends Application {
 
-    public void setLabel(String label) {
-        this.label = label;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
+    @GET
+    @Path("/")
+    @Produces(MediaType.APPLICATION_JSON)
+    public KabaneroInstallation getInstallDetails() {
+        return new KabaneroInstallation();
     }
 }
