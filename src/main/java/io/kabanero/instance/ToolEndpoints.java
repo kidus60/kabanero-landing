@@ -18,8 +18,6 @@
 
 package io.kabanero.instance;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.Collection;
 
 import javax.enterprise.context.RequestScoped;
@@ -32,7 +30,6 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import io.kubernetes.client.ApiException;
 import io.website.ResponseMessage;
 
 @ApplicationPath("api")
@@ -43,14 +40,14 @@ public class ToolEndpoints extends Application {
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<KabaneroTool> getAllTools() throws IOException, GeneralSecurityException, ApiException {
+    public Collection<KabaneroTool> getAllTools() {
         return KabaneroToolManager.getKabaneroToolManagerInstance().getAllTools();
     }
 
     @GET
     @Path("/{toolName}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getATool(@PathParam("toolName") String toolName) throws IOException, GeneralSecurityException, ApiException {
+    public Response getATool(@PathParam("toolName") String toolName) {
         KabaneroTool wantedInstance = KabaneroToolManager.getKabaneroToolManagerInstance().getTool(toolName);
         if(wantedInstance == null){
             return Response.status(404).entity(new ResponseMessage(toolName + " not found")).build();

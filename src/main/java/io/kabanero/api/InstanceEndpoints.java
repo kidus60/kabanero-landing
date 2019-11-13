@@ -18,8 +18,6 @@
 
 package io.kabanero.api;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.Collection;
 
 import javax.enterprise.context.RequestScoped;
@@ -32,7 +30,6 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import io.kubernetes.client.ApiException;
 import io.kabanero.instance.KabaneroInstance;
 import io.kabanero.instance.KabaneroManager;
 import io.website.ResponseMessage;
@@ -45,14 +42,14 @@ public class InstanceEndpoints extends Application {
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<KabaneroInstance> getAllInstances() throws IOException, ApiException, GeneralSecurityException {
+    public Collection<KabaneroInstance> getAllInstances() {
         return KabaneroManager.getKabaneroManagerInstance().getAllKabaneroInstances();
     }
 
     @GET
     @Path("/{instanceName}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAInstance(@PathParam("instanceName") String instanceName) throws IOException, ApiException, GeneralSecurityException {
+    public Response getAInstance(@PathParam("instanceName") String instanceName) {
         KabaneroInstance wantedInstance = KabaneroManager.getKabaneroManagerInstance().getKabaneroInstance(instanceName);
         if(wantedInstance == null){
             return Response.status(404).entity(new ResponseMessage(instanceName + " not found")).build();

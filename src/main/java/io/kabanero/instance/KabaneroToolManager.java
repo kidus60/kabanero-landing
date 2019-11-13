@@ -19,14 +19,11 @@
 
 package io.kabanero.instance;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.HashMap;
 
 import io.website.Constants;
 import io.kubernetes.KabaneroClient;
-import io.kubernetes.client.ApiException;
 
 // Singleton class to manage the various tools associated with Kabanero
 public class KabaneroToolManager {
@@ -37,9 +34,9 @@ public class KabaneroToolManager {
     private KabaneroToolManager() {
     }
 
-    public static synchronized KabaneroToolManager getKabaneroToolManagerInstance() throws IOException, GeneralSecurityException, ApiException {
-        
-        if(SINGLE_TOOL_MANAGER_INSTANCE == null ||  KabaneroClient.isOld()) {
+    public static synchronized KabaneroToolManager getKabaneroToolManagerInstance() {
+
+        if(SINGLE_TOOL_MANAGER_INSTANCE == null) {
             SINGLE_TOOL_MANAGER_INSTANCE = new KabaneroToolManager();
             
             try {

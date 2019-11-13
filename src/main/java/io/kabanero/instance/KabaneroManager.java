@@ -19,8 +19,6 @@
 
 package io.kabanero.instance;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +27,6 @@ import java.util.logging.Logger;
 
 import io.website.Constants;
 import io.kubernetes.KabaneroClient;
-import io.kubernetes.client.ApiException;
 
 // Singleton class to manage the various kabanero instances associated with Kabanero
 public class KabaneroManager {
@@ -41,9 +38,10 @@ public class KabaneroManager {
     private KabaneroManager() {
     }
 
-    public static synchronized KabaneroManager getKabaneroManagerInstance() throws IOException, GeneralSecurityException, ApiException {
+    
+    public static synchronized KabaneroManager getKabaneroManagerInstance() {
 
-        if(SINGLE_KABANERO_MANAGER_INSTANCE == null || KabaneroClient.isOld()) {
+        if(SINGLE_KABANERO_MANAGER_INSTANCE == null) {
             SINGLE_KABANERO_MANAGER_INSTANCE = new KabaneroManager();
 
             try {
