@@ -38,12 +38,10 @@ public class KabaneroManager {
     private KabaneroManager() {
     }
 
-    
     public static synchronized KabaneroManager getKabaneroManagerInstance() {
-
         if(SINGLE_KABANERO_MANAGER_INSTANCE == null) {
             SINGLE_KABANERO_MANAGER_INSTANCE = new KabaneroManager();
-
+        }
             try {
                 List<KabaneroInstance> instances = KabaneroClient.getInstances();
                 
@@ -54,8 +52,7 @@ public class KabaneroManager {
                 LOGGER.log(Level.WARNING, "Exception while getting Kabanero instances", e);
                 SINGLE_KABANERO_MANAGER_INSTANCE.addInstance(KabaneroManager.createDefaultInstance());
             }
-        }
-
+        
         return SINGLE_KABANERO_MANAGER_INSTANCE;
     }
 

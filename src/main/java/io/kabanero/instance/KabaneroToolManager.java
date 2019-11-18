@@ -35,9 +35,9 @@ public class KabaneroToolManager {
     }
 
     public static synchronized KabaneroToolManager getKabaneroToolManagerInstance() {
-
         if(SINGLE_TOOL_MANAGER_INSTANCE == null) {
             SINGLE_TOOL_MANAGER_INSTANCE = new KabaneroToolManager();
+        }
             
             try {
                 KabaneroClient.discoverTools(SINGLE_TOOL_MANAGER_INSTANCE);        
@@ -45,8 +45,7 @@ public class KabaneroToolManager {
                 e.printStackTrace();
                 KabaneroToolManager.addDefaultTools(SINGLE_TOOL_MANAGER_INSTANCE);
             }
-        }
-
+        
         return SINGLE_TOOL_MANAGER_INSTANCE;
     }
 

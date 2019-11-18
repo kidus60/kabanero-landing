@@ -28,10 +28,8 @@ import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
 import io.kubernetes.client.Configuration;
 import io.kubernetes.client.apis.CustomObjectsApi;
-import io.kubernetes.client.models.V1Event;
 import io.kubernetes.client.util.ClientBuilder;
 import io.kubernetes.client.util.KubeConfig;
-import io.kubernetes.client.util.Watch;
 
 import java.io.File;
 import java.io.FileReader;
@@ -52,7 +50,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import com.google.common.reflect.TypeToken;
 import com.squareup.okhttp.ConnectionSpec;
 
 public class KabaneroClient {
@@ -99,7 +96,7 @@ public class KabaneroClient {
         ConnectionSpec spec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS).allEnabledCipherSuites().build();
         client.getHttpClient().setConnectionSpecs(Collections.singletonList((spec)));
 
-        client.getHttpClient().setReadTimeout(0, TimeUnit.SECONDS); // infinite timeout
+       client.getHttpClient().setReadTimeout(0, TimeUnit.SECONDS); // infinite timeout
 
         Configuration.setDefaultApiClient(client);
         return client;
@@ -190,10 +187,6 @@ public class KabaneroClient {
         return collections;
     }
 
-    public static void main(String[] args) {
-        
-    }
-    
     private static List<KubeKabanero> listKabaneroInstances(ApiClient apiClient, String namespace) throws ApiException, IOException {
         CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
         String group = "kabanero.io";
@@ -202,41 +195,25 @@ public class KabaneroClient {
 
         List<KubeKabanero> instances = new ArrayList<KubeKabanero>();
 
-        Watch<Object> watch = Watch.createWatch(
-            apiClient, 
-            customApi.listNamespacedCustomObjectCall(group, version, namespace, plural, "true", "", "", 5, true, null, null), 
-            new TypeToken<Watch.Response<Object>>() {}.getType());
+        Object obj = customApi.listNamespacedCustomObject(group, version, namespace, plural, "true", "", "", 5, true);
+        Map<String, ?> map = (Map<String, ?>) obj;
+        Map<String, ?> item = (Map<String, ?>) map.get("object");
 
-        try {
-            for (Watch.Response<Object> event : watch) {
-                if (event.type != null) {
-                    LOGGER.log(Level.WARNING, "triggered");
-                    LOGGER.log(Level.WARNING, event.type, event);
-                    Object obj = customApi.listNamespacedCustomObject(group, version, namespace, plural, "true", "", "", 5, true);
-                    Map<String, ?> map = (Map<String, ?>) obj;
-                    List<Map<String, ?>> items = (List<Map<String, ?>>) map.get("items");
-                    for (Map<String, ?> item : items) {
-                        Map<String, ?> metadata = (Map<String, ?>) item.get("metadata");
-                        String name = (String) metadata.get("name");
-                        String creationTime = (String) metadata.get("creationTimestamp");
+            Map<String, ?> metadata = (Map<String, ?>) item.get("metadata");
+            String name = (String) metadata.get("name");
+            String creationTime = (String) metadata.get("creationTimestamp");
 
-                        KubeKabanero instance = new KubeKabanero(name, creationTime);
+            KubeKabanero instance = new KubeKabanero(name, creationTime);
 
-                        Map<String, ?> spec = (Map<String, ?>) item.get("spec");
-                        if (spec != null) {
-                            Map<String, ?> collections = (Map<String, ?>) spec.get("collections");
-                            if (collections != null) {
-                                List<Map<String, ?>> repositories = (List<Map<String, ?>>) collections.get("repositories");
-                                instance.setRepositories(repositories);
-                            }
-                        }
-                        instances.add(instance);
-                    }
+            Map<String, ?> spec = (Map<String, ?>) item.get("spec");
+            if (spec != null) {
+                Map<String, ?> collections = (Map<String, ?>) spec.get("collections");
+                if (collections != null) {
+                    List<Map<String, ?>> repositories = (List<Map<String, ?>>) collections.get("repositories");
+                    instance.setRepositories(repositories);
                 }
             }
-        } finally {
-            watch.close();
-        }
+            instances.add(instance);
 
         return instances;
     }
