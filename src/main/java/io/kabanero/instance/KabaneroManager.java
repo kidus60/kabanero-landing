@@ -39,7 +39,6 @@ public class KabaneroManager {
     }
 
     public static synchronized KabaneroManager getKabaneroManagerInstance() {
-        // quick hack: isOld will force refresh every so often - we should be watching for changes instead
         if(SINGLE_KABANERO_MANAGER_INSTANCE == null) {
             SINGLE_KABANERO_MANAGER_INSTANCE = new KabaneroManager();
         }

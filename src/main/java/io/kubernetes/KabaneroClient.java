@@ -217,7 +217,8 @@ public class KabaneroClient {
 
         Object obj = customApi.listNamespacedCustomObject(group, version, namespace, plural, "true", "", rs, 5, true);
 
-        Map<String, ?> item = (Map<String, ?>) obj;
+        Map<String, ?> map = (Map<String, ?>) obj;
+        Map<String, ?> item = (Map<String, ?>) map.get("object");
         Map<String, ?> metadata = (Map<String, ?>) item.get("metadata");
 
         String name = (String) metadata.get("name");
