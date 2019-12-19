@@ -203,38 +203,29 @@ public class KabaneroClient {
         if (resourceVersion > 0)
             rs = Integer.toString(resourceVersion);
 
-        Watch<Object> watch = Watch.createWatch(
-            apiClient, 
-            customApi.listNamespacedCustomObjectCall(group, version, namespace, plural, "true", "", rs, 5, true, null, null), 
-            new TypeToken<Watch.Response<Object>>(){}.getType());
+        Object obj = customApi.listNamespacedCustomObject(group, version, namespace, plural, "true", "", rs, 5, true);
 
-        try {
-            for (Watch.Response<Object> obj : watch) {
-                Map<String, ?> item = (Map<String, ?>) obj.object;
-                Map<String, ?> metadata = (Map<String, ?>) item.get("metadata");
+        Map<String, ?> item = (Map<String, ?>) obj;
+        Map<String, ?> metadata = (Map<String, ?>) item.get("metadata");
 
-                String name = (String) metadata.get("name");
-                String creationTime = (String) metadata.get("creationTimestamp");
+        String name = (String) metadata.get("name");
+        String creationTime = (String) metadata.get("creationTimestamp");
 
-                int resourceVersionNew = Integer.parseInt((String) metadata.get("resourceVersion"));
+        int resourceVersionNew = Integer.parseInt((String) metadata.get("resourceVersion"));
 
-                if (resourceVersionNew > resourceVersion) {
-                    KubeKabanero instance = new KubeKabanero(name, creationTime);
+        if (resourceVersionNew > resourceVersion) {
+            KubeKabanero instance = new KubeKabanero(name, creationTime);
 
-                    Map<String, ?> spec = (Map<String, ?>) item.get("spec");
-                    if (spec != null) {
-                        Map<String, ?> collections = (Map<String, ?>) spec.get("collections");
-                        if (collections != null) {
-                            List<Map<String, ?>> repositories = (List<Map<String, ?>>) collections.get("repositories");
-                            instance.setRepositories(repositories);
-                        }
-                        instances.add(instance);
-                        resourceVersion = resourceVersionNew;
-                    }
+            Map<String, ?> spec = (Map<String, ?>) item.get("spec");
+            if (spec != null) {
+                Map<String, ?> collections = (Map<String, ?>) spec.get("collections");
+                if (collections != null) {
+                    List<Map<String, ?>> repositories = (List<Map<String, ?>>) collections.get("repositories");
+                    instance.setRepositories(repositories);
                 }
+                instances.add(instance);
+                resourceVersion = resourceVersionNew;
             }
-        } finally {
-            watch.close();
         }
 
         return instances;
