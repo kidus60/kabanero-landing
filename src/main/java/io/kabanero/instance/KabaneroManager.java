@@ -34,20 +34,14 @@ public class KabaneroManager {
 
     private static KabaneroManager SINGLE_KABANERO_MANAGER_INSTANCE;
     private HashMap<String, KabaneroInstance> KABANERO_INSTANCES = new HashMap<String, KabaneroInstance>();
-    private long created = System.currentTimeMillis();
 
     private KabaneroManager() {
     }
 
-    private boolean isOld() {
-        return (System.currentTimeMillis() - SINGLE_KABANERO_MANAGER_INSTANCE.created > 1000 * 60 * 5);
-    }
-    
     public static synchronized KabaneroManager getKabaneroManagerInstance() {
-        // quick hack: isOld will force refresh every so often - we should be watching for changes instead
-        if(SINGLE_KABANERO_MANAGER_INSTANCE == null || SINGLE_KABANERO_MANAGER_INSTANCE.isOld()) {
+        if(SINGLE_KABANERO_MANAGER_INSTANCE == null) {
             SINGLE_KABANERO_MANAGER_INSTANCE = new KabaneroManager();
-
+        }
             try {
                 List<KabaneroInstance> instances = KabaneroClient.getInstances();
                 
@@ -58,7 +52,6 @@ public class KabaneroManager {
                 LOGGER.log(Level.WARNING, "Exception while getting Kabanero instances", e);
                 SINGLE_KABANERO_MANAGER_INSTANCE.addInstance(KabaneroManager.createDefaultInstance());
             }
-        }
 
         return SINGLE_KABANERO_MANAGER_INSTANCE;
     }

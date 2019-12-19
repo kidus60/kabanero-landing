@@ -17,7 +17,6 @@
  ******************************************************************************/
 package io.kubernetes;
 
-import io.website.Constants;
 import io.kabanero.instance.KabaneroCollection;
 import io.kabanero.instance.KabaneroInstance;
 import io.kabanero.instance.KabaneroRepository;
@@ -30,18 +29,23 @@ import io.kubernetes.client.Configuration;
 import io.kubernetes.client.apis.CustomObjectsApi;
 import io.kubernetes.client.util.ClientBuilder;
 import io.kubernetes.client.util.KubeConfig;
+import io.kubernetes.client.util.Watch;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,10 +53,18 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.google.gson.reflect.TypeToken;
 import com.squareup.okhttp.ConnectionSpec;
+
+import org.apache.commons.io.IOUtils;
 
 public class KabaneroClient {
     private final static Logger LOGGER = Logger.getLogger(KabaneroClient.class.getName());
+
+    private static int resourceVersion = 0;
 
     // routes from kabanero namespace
     private static String getLabeledRoute(String Label, Map<String, Route> routes) {
@@ -95,6 +107,9 @@ public class KabaneroClient {
         ConnectionSpec spec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS).allEnabledCipherSuites().build();
         client.getHttpClient().setConnectionSpecs(Collections.singletonList((spec)));
 
+        // Infinite timeout for Watch API
+        client.getHttpClient().setReadTimeout(0, TimeUnit.SECONDS);
+        
         Configuration.setDefaultApiClient(client);
         return client;
     }
@@ -121,8 +136,9 @@ public class KabaneroClient {
 
             String clusterName = null;
 
-            KabaneroInstance kabInst = new KabaneroInstance(username, instanceName, date, kabaneroRepositories, clusterName, kabaneroCollections, cliURL);
-            LOGGER.log(Level.FINE, "Kabanero Instance: {0}: {1}", new Object[]{ kabInst.getInstanceName(), kabInst});
+            KabaneroInstance kabInst = new KabaneroInstance(username, instanceName, date, kabaneroRepositories,
+                    clusterName, kabaneroCollections, cliURL);
+            LOGGER.log(Level.FINE, "Kabanero Instance: {0}: {1}", new Object[] { kabInst.getInstanceName(), kabInst });
 
             kabaneroInstances.add(kabInst);
         }
@@ -140,24 +156,30 @@ public class KabaneroClient {
     public static void discoverTools(KabaneroToolManager tools) throws IOException, ApiException, GeneralSecurityException {
         ApiClient client = KabaneroClient.getApiClient();
 
-        Map<String, Route> routes = null;
+        InputStream inputStream = KabaneroClient.class.getClassLoader().getResourceAsStream("tools.json");
 
-        routes = KabaneroClient.listRoutes(client, "tekton-pipelines");
-        if (routes != null) {
-            String url = KabaneroClient.getLabeledRoute("tekton-dashboard", routes);
-            tools.addTool(new KabaneroTool(Constants.TEKTON_DASHBOARD_LABEL, url));
-        }
+        try {
+            JSONArray toolsList = new JSONArray(IOUtils.toString(inputStream, StandardCharsets.UTF_8));
 
-        routes = KabaneroClient.listRoutes(client, "ta");
-        if (routes != null) {
-            String url = KabaneroClient.getTransformationAdvisorURL(routes);
-            tools.addTool(new KabaneroTool(Constants.TA_DASHBOARD_LABEL, url));
-        }
+            Map<String, Route> routes = null;
 
-        routes = KabaneroClient.listRoutes(client, "kappnav");
-        if (routes != null) {
-            String url = KabaneroClient.getLabeledRoute("kappnav-ui-service", routes);
-            tools.addTool(new KabaneroTool(Constants.KAPPNAV_LABEL, url));
+            Iterator<Object> iterator = toolsList.iterator();
+            while (iterator.hasNext()) {
+                JSONObject tool = (JSONObject) iterator.next();
+                
+                String toolName = tool.get("toolName").toString();
+                String namespace = tool.get("namespace").toString();
+                String route = tool.get("route").toString();
+
+                routes = KabaneroClient.listRoutes(client, namespace);
+
+                if (routes != null) {
+                    String url = (namespace == "ta") ? KabaneroClient.getTransformationAdvisorURL(routes) : KabaneroClient.getLabeledRoute(route, routes); 
+                    tools.addTool(new KabaneroTool(toolName, url));
+                }
+            }
+        } finally {
+            inputStream.close();
         }
     }
 
@@ -184,7 +206,7 @@ public class KabaneroClient {
         return collections;
     }
 
-    private static List<KubeKabanero> listKabaneroInstances(ApiClient apiClient, String namespace) throws ApiException {
+    private static List<KubeKabanero> listKabaneroInstances(ApiClient apiClient, String namespace) throws ApiException, IOException {
         CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
         String group = "kabanero.io";
         String version = "v1alpha1";
@@ -192,26 +214,44 @@ public class KabaneroClient {
 
         List<KubeKabanero> instances = new ArrayList<KubeKabanero>();
 
-        Object obj = customApi.listNamespacedCustomObject(group, version, namespace, plural, "true", "", "", 60, false);
-        Map<String, ?> map = (Map<String, ?>) obj;
-        List<Map<String, ?>> items = (List<Map<String, ?>>) map.get("items");
-        for (Map<String, ?> item : items) {
-            Map<String, ?> metadata = (Map<String, ?>) item.get("metadata");
-            String name = (String) metadata.get("name");
-            String creationTime = (String) metadata.get("creationTimestamp");
+        String rs = null;
+        if (resourceVersion > 0)
+            rs = Integer.toString(resourceVersion);
 
-            KubeKabanero instance = new KubeKabanero(name, creationTime);
+        Watch<Object> watch = Watch.createWatch(
+            apiClient, 
+            customApi.listNamespacedCustomObjectCall(group, version, namespace, plural, "true", "", rs, 5, true, null, null), 
+            new TypeToken<Watch.Response<Object>>(){}.getType());
 
-            Map<String, ?> spec = (Map<String, ?>) item.get("spec");
-            if (spec != null) {
-                Map<String, ?> collections = (Map<String, ?>) spec.get("collections");
-                if (collections != null) {
-                    List<Map<String, ?>> repositories = (List<Map<String, ?>>) collections.get("repositories");
-                    instance.setRepositories(repositories);
+        try {
+            for (Watch.Response<Object> obj : watch) {
+                Map<String, ?> item = (Map<String, ?>) obj.object;
+                Map<String, ?> metadata = (Map<String, ?>) item.get("metadata");
+
+                String name = (String) metadata.get("name");
+                String creationTime = (String) metadata.get("creationTimestamp");
+
+                int resourceVersionNew = Integer.parseInt((String) metadata.get("resourceVersion"));
+
+                if (resourceVersionNew > resourceVersion) {
+                    KubeKabanero instance = new KubeKabanero(name, creationTime);
+
+                    Map<String, ?> spec = (Map<String, ?>) item.get("spec");
+                    if (spec != null) {
+                        Map<String, ?> collections = (Map<String, ?>) spec.get("collections");
+                        if (collections != null) {
+                            List<Map<String, ?>> repositories = (List<Map<String, ?>>) collections.get("repositories");
+                            instance.setRepositories(repositories);
+                        }
+                        instances.add(instance);
+                        resourceVersion = resourceVersionNew;
+                    }
                 }
             }
-            instances.add(instance);
+        } finally {
+            watch.close();
         }
+
         return instances;
     }
 
