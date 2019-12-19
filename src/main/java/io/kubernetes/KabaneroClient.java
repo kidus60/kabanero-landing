@@ -203,7 +203,7 @@ public class KabaneroClient {
         return collections;
     }
 
-    private static List<KubeKabanero> listKabaneroInstances(ApiClient apiClient, String namespace) throws ApiException, IOException {
+    private static List<KubeKabanero> listKabaneroInstances(ApiClient apiClient, String namespace) throws ApiException {
         CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
         String group = "kabanero.io";
         String version = "v1alpha1";
@@ -223,7 +223,6 @@ public class KabaneroClient {
 
         String name = (String) metadata.get("name");
         String creationTime = (String) metadata.get("creationTimestamp");
-
         int resourceVersionNew = Integer.parseInt((String) metadata.get("resourceVersion"));
 
         if (resourceVersionNew > resourceVersion) {
@@ -240,7 +239,6 @@ public class KabaneroClient {
                 resourceVersion = resourceVersionNew;
             }
         }
-
         return instances;
     }
 
