@@ -193,7 +193,7 @@ public class KabaneroClient {
 
     private static List<KubeKabanero> listKabaneroInstances(ApiClient apiClient, String namespace) throws ApiException, IOException {
         CustomObjectsApi customApi = new CustomObjectsApi(apiClient);
-        String group = "kabanero.io";
+        String group = "kabanero.io"; 
         String version = "v1alpha1";
         String plural = "kabaneros";
 
