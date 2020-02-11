@@ -6,9 +6,9 @@ before_install:
 install:
   - docker build --cache-from  kabanerobuild/website-travis:latest -t landing-travis -f travis/Dockerfile .
 
-stages:
-  - name: Running tests
-    if: (type IN (pull_request))
+# stages:
+#   - name: Running tests
+#     if: (type IN (pull_request))
 
 jobs:
   include:
