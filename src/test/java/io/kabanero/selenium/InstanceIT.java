@@ -2,6 +2,8 @@ package io.kabanero.selenium;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
+
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -20,7 +22,7 @@ public class InstanceIT {
     private JavascriptExecutor js;
 
     @BeforeClass
-    public static void setupClass() {
+    public static void setupClass() throws IOException {
         // Manages the browser driver binary for us
         WebDriverManager.chromedriver().setup();
         ChromeOptions options = new ChromeOptions();
