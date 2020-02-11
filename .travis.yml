@@ -17,3 +17,4 @@ jobs:
       script:
         - ./travis/docker_run.sh "./node_modules/.bin/eslint src/main/content/_assets/js/*.js"
         - ./travis/docker_run.sh ./scripts/build_jekyll_maven.sh
+        - ./travis/docker_run.sh "mvn verify"
