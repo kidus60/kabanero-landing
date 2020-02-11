@@ -2,10 +2,6 @@ package io.kabanero.selenium;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -17,7 +13,6 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
-import io.kubernetes.client.ApiException;
 
 public class InstanceIT {
     private static WebDriver driver;
@@ -35,7 +30,7 @@ public class InstanceIT {
     }
 
     @Before
-    public void beforeTest() throws IOException, ApiException, GeneralSecurityException {
+    public void beforeTest(){
         // selenium stuff
         driver.get(baseUrl);
         js = (JavascriptExecutor) driver;
