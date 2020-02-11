@@ -1,4 +1,6 @@
 language: minimal
+addons:
+  chrome: stable
 
 before_install:
   - docker pull  kabanerobuild/website-travis:latest 
