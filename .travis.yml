@@ -9,6 +9,11 @@ before_install:
 install:
   - docker build --cache-from  kabanerobuild/website-travis:latest -t landing-travis -f travis/Dockerfile .
 
+before_install: 
+  - wget http://chromedriver.storage.googleapis.com/2.24/chromedriver_linux64.zip
+  - unzip chromedriver_linux64.zip -d /home/travis/virtualenv/python2.7.12/bin/
+  - export CHROME_BIN=chromium-browser
+
 # stages:
 #   - name: Running tests
 #     if: (type IN (pull_request))
