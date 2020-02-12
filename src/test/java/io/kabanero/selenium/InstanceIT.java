@@ -26,7 +26,7 @@ public class InstanceIT {
         // Manages the browser driver binary for us
         WebDriverManager.chromedriver().setup();
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--ignore-certificate-errors");
+        options.addArguments("--ignore-certificate-errors", "--no-sandbox");
         options.setHeadless(true);
         driver = new ChromeDriver(options);
     }

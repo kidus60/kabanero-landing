@@ -30,3 +30,5 @@ ENV LANG C.UTF-8
 COPY . .
 
 RUN bash ./scripts/build_jekyll_maven.sh
+
+EXPOSE 9443
