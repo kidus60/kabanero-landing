@@ -20,7 +20,7 @@ cp ./node_modules/carbon-icons/dist/svg/* "$CONTENT_DIR/img/carbon-icons/"
 # Guides that are ready to be published to the Code Conjuring site
 if [ "$TRAVIS_EVENT_TYPE" != "pull_request" ]; then 
     echo "Cloning repositories with name starting with guide or iguide..."
-    ruby ./scripts/build_clone_guides.rb;
+   # ruby ./scripts/build_clone_guides.rb;
 fi
 
 # Development environment only actions
