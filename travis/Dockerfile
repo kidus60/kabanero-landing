@@ -3,23 +3,19 @@ FROM ruby:latest
 
 # update the repository sources list
 # and install dependencies
-# RUN apt-get update \
-#     && apt-get -y install maven \
-#     && apt-get -y install python3-requests 
-
-RUN apt-get update && \
-    apt-get install -y gnupg wget curl unzip --no-install-recommends && \
-    wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
-    echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list && \
-    apt-get update -y && \
-    apt-get install -y google-chrome-stable && \
-    CHROMEVER=$(google-chrome --product-version | grep -o "[^\.]*\.[^\.]*\.[^\.]*") && \
-    DRIVERVER=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROMEVER") && \
-    wget -q --continue -P /chromedriver "http://chromedriver.storage.googleapis.com/$DRIVERVER/chromedriver_linux64.zip" && \
-    unzip /chromedriver/chromedriver* -d /chromedriver \
+RUN apt-get update \
     && apt-get -y install maven \
     && apt-get -y install python3-requests 
 
+ 
+# Install Chrome for Selenium
+RUN curl https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o /chrome.deb
+RUN dpkg -i /chrome.deb || apt-get install -yf
+RUN rm /chrome.deb
+
+# Install chromedriver for Selenium
+RUN curl https://chromedriver.storage.googleapis.com/2.31/chromedriver_linux64.zip -o /usr/local/bin/chromedriver
+RUN chmod +x /usr/local/bin/chromedriver
 
 # install node for lint test dependencies
 ENV NODE_VERSION=12.6.0
