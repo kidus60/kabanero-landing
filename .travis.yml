@@ -1,7 +1,4 @@
 language: minimal
-dist: trusty
-addons:
-  chrome: stable
 
 before_install:
   - docker pull  kabanerobuild/website-travis:latest 
@@ -9,11 +6,6 @@ before_install:
 install:
   - docker build --cache-from  kabanerobuild/website-travis:latest -t landing-travis -f travis/Dockerfile .
 
-before_install: 
-  - wget http://chromedriver.storage.googleapis.com/2.24/chromedriver_linux64.zip
-  - unzip chromedriver_linux64.zip
-  - sudo chmod u+x chromedriver
-  - sudo mv chromedriver /usr/bin/
 # stages:
 #   - name: Running tests
 #     if: (type IN (pull_request))
