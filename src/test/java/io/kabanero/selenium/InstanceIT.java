@@ -12,10 +12,11 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
-
+  
 public class InstanceIT {
     private static WebDriver driver;
     private String baseUrl = "https://localhost:9443/instance/";
@@ -26,7 +27,7 @@ public class InstanceIT {
         // Manages the browser driver binary for us
         WebDriverManager.chromedriver().setup();
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless", "--no-sandbox", "--disable-dev-shm-usage");
+        options.addArguments("--ignore-certificate-errors","--no-sandbox", "--disable-dev-shm-usage");
         options.setHeadless(true);
         driver = new ChromeDriver(options);
     }
