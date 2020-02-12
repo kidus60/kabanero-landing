@@ -31,4 +31,4 @@ COPY . .
 
 RUN bash ./scripts/build_jekyll_maven.sh
 
-EXPOSE 9443
+EXPOSE 9515
