@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.List;
+import java.awt.datatransfer.*;
+import java.awt.Toolkit;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -142,5 +144,31 @@ public class InstanceIT {
         assertEquals("Management CLI URL equals " + expectedApplicationsButtonHref, actualApplicationsButtonHref, actualApplicationsButtonHref);
     }
 
+
+    @Test
+    public void copiesToClipBoardIT() throws InterruptedException, UnsupportedFlavorException, IOException {
+        String expectedAppsodyURL = "https://github.com/kabanero-io/collections/releases/download/0.5.0/kabanero-index.yaml";
+        String actualAppsodyURL = getClipboardValue(By.className("appsody-url"));
+        assertEquals("instance name equals " + expectedAppsodyURL, expectedAppsodyURL, actualAppsodyURL);
+
+        String expectedCodewindURL = "https://github.com/kabanero-io/collections/releases/download/0.5.0/kabanero-index.json";
+        String actualCodewindURL = getClipboardValue(By.className("codewind-url"));
+        assertEquals("instance name equals " + expectedCodewindURL, expectedCodewindURL, actualCodewindURL);
+
+        String expectedCliURL = "kabanero-cli-kabanero.apps.alohr.os.fyre.ibm.com";
+        String actualCliURL = getClipboardValue(By.id("management-cli"));
+        assertEquals("instance name equals " + expectedCliURL, expectedCliURL, actualCliURL);
+    }
+
+    public String getClipboardValue(By selector) throws UnsupportedFlavorException, IOException {
+        WebElement urlBox = driver.findElement(selector);
+        urlBox.click();
+
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
+        Clipboard clipboard = toolkit.getSystemClipboard();
+        String clipboardContent = (String) clipboard.getData(DataFlavor.stringFlavor);
+
+        return clipboardContent;
+    }
     
 }
