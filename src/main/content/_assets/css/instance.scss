@@ -21,7 +21,8 @@
 "../../../../../node_modules/carbon-components/scss/components/button/button",
 "../../../../../node_modules/carbon-components/scss/components/modal/modal",
 "../../../../../node_modules/carbon-components/scss/components/loading/loading",
-"../../../../../node_modules/carbon-components/scss/components/tile/tile"; 
+"../../../../../node_modules/carbon-components/scss/components/tile/tile",
+"../../../../../node_modules/carbon-components/scss/components/notification/inline-notification"; 
 //declare variables
 $color-ibm:#3d70b2;
 
@@ -160,4 +161,59 @@ button:disabled > .arrow-container > svg{
 
 .instance-header {
     padding-bottom: 5px;
+}
+
+.instancre-details{
+    display: flex;
+}
+
+.creation-date, .team-members{
+    padding-left: 3px;
+}
+
+.bx--accordion__content p{
+    font-weight: 500 !important;
+}
+
+.instance-admins-subheader{
+    padding-top: 15px;
+}
+
+#manage-admins-link{
+    cursor: pointer;
+    text-decoration: underline !important;
+}
+
+#instance-accordion-admins-list{
+    display: grid;
+}
+
+.instance-admin-names{
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.25rem;
+    letter-spacing: 0.16px;
+}
+
+.modal-content-user-info{
+    width: 13rem;
+}
+
+.instance-inline-admin-list-notification{
+    background-color: white;
+    color: black;
+    border: solid .02px black;
+}
+
+.modal-content-inline-close-button{
+    fill: black !important;
+}
+
+.bx--inline-notification__close-button{
+    cursor:  unset !important;
+}
+
+.bx--inline-notification__text-wrapper{
+    padding: 0 !important;
+    flex-wrap: unset !important;
 }

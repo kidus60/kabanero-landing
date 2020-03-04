@@ -63,8 +63,8 @@ function loadAllInfo(instanceJSON) {
         .then(setToolData);
 
     fetchOAuthDetails()
-        .then(setOAuth);
-}
+        .then(setOAuth);    
+    }
 
 // Set details on UI for any given instance
 function setToolData(tools) {
@@ -159,5 +159,6 @@ function setOAuth(oauthJSON) {
         let selectedInstance = $("#selected-instance-name").text().trim();
         $("#stacks-oauth-msg").text("Manage Stacks");
         $("#stacks-link").attr("href", `/instance/stacks?name=${selectedInstance}`);
+        fetchUserGithubLogin();
     }
 }

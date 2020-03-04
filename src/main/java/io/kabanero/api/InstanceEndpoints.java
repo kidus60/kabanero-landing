@@ -20,6 +20,7 @@ package io.kabanero.api;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.enterprise.context.RequestScoped;
@@ -126,9 +127,38 @@ public class InstanceEndpoints extends Application {
     }
 
     @GET
+    @Path("{instanceName}/admin/list")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAdminLis(@PathParam("instanceName") String instanceName) throws IOException, ApiException, GeneralSecurityException {
+        UserProfile userProfile = UserProfileManager.getUserProfile();
+        String token = userProfile.getAccessToken();
+        GitHubClient client = new GitHubClient();
+        client.setOAuth2Token(token);
+
+        Kabanero instance = KabaneroClient.getAnInstance(instanceName);
+        if (instance == null) {
+            return Response.status(404).entity(new ResponseMessage(instanceName + " not found")).build();
+        }
+
+        String instanceGithubOrg = instance.getSpec().getGithub().getOrganization();
+        TeamService teamService = new TeamService(client);
+        List<User> instanceAdmins = new ArrayList<>();
+
+        for (Team orgTeam : teamService.getTeams(instanceGithubOrg)) {
+            for (User instanceTeamMember : teamService.getMembers(orgTeam.getId())) {
+                if(!instanceAdmins.stream().filter(member -> instanceTeamMember.getLogin().contains(member.getLogin())).findAny().isPresent()) {
+                    instanceAdmins.add(new UserService(client).getUser(instanceTeamMember.getLogin()));
+                }
+            }
+        }
+
+        return Response.ok(instanceAdmins).build();
+    }
+
+    @GET
     @Path("{instanceName}/team/{wantedTeamName}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response isAdmin(@PathParam("instanceName") String instanceName, @PathParam("wantedTeamName") String wantedTeamName) throws IOException, ApiException, GeneralSecurityException {
+    public Response getTeamMembers(@PathParam("instanceName") String instanceName, @PathParam("wantedTeamName") String wantedTeamName) throws IOException, ApiException, GeneralSecurityException {
         UserProfile userProfile = UserProfileManager.getUserProfile();
         String token = userProfile.getAccessToken();
         GitHubClient client = new GitHubClient();

@@ -72,6 +72,66 @@ function fetchStacks(instanceName) {
         .catch(error => console.error("Error getting stacks", error));
 }
 
+function fetchUserGithubLogin(){
+    return fetch(`/api/auth/git/user`)
+        .then(function (response) {
+            if(response.status === 200){
+                fetchUserAdminStatus();
+            }
+        })
+        .catch(error => console.error("Error getting github user", error));
+}
+
+
+function fetchUserAdminStatus() {
+    let instanceName = $("#instance-accordion").find(".bx--accordion__title").text();
+    
+    if (typeof instanceName === "undefined") {
+        return;
+    }
+    return fetch(`/api/kabanero/${instanceName}/admin`)
+        .then(function (response) {
+            return response.json();
+        })
+        .then(fetchInstanceAdmins)
+        .catch(error => console.error("Error getting stacks", error));
+}
+
+
+function fetchInstanceAdmins(isAdmin){
+    let instanceName = $("#instance-accordion").find(".bx--accordion__title").text();
+
+    if (typeof instanceName === "undefined" || !isAdmin) {
+        return;
+    }
+    return fetch(`/api/kabanero/${instanceName}/admin/list`)
+        .then(function (response) {
+            return response.json();
+        })
+        .then(updateAdminView)
+        .catch(error => console.error("Error getting stacks", error));
+}
+
+function updateAdminView(adminsListJson){
+    if (!adminsListJson || adminsListJson == null){
+        return;
+    }
+    adminsListJson.forEach(user => {
+        let githubAdminFirstName = user.name.split(" ")[0];
+        let githubAdminLastName = user.name.split(" ")[1];
+        let githubAdminEmail = user.email == null ? "Unavailable" : user.email;
+
+        let box = $("#instance-admin-list-notification-template").clone().removeAttr("id").removeClass("hidden");
+        $(box).find("#github-admin-modal-first-name").text(githubAdminFirstName);
+        $(box).find("#github-admin-modal-last-name").text(githubAdminLastName);
+        $(box).find("#github-admin-modal-email").text(githubAdminEmail);
+        
+        $("#admin-modal-content").append(box);
+        $("#instance-accordion-admins-list").append(`<span class="instance-admin-names">${githubAdminFirstName}<span>`);
+    });
+    $("#instance-accordion-admin-view").show();
+}
+
 let ToolPane = class {
     constructor(label, location, paneText, buttonText, https) {
         this.label = label;
