@@ -72,7 +72,7 @@ function fetchStacks(instanceName) {
         .catch(error => console.error("Error getting stacks", error));
 }
 
-function fetchUserGithubLogin(){
+function fetchUserGithub(){
     return fetch(`/api/auth/git/user`)
         .then(function (response) {
             if(response.status === 200){
