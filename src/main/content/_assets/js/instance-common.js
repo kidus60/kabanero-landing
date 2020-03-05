@@ -76,8 +76,9 @@ function fetchUserGithub(){
     return fetch(`/api/auth/git/user`)
         .then(function (response) {
             if(response.status === 200){
-                fetchUserAdminStatus();
+                return fetchUserAdminStatus();
             }
+            console.warn(`Fetching github user details returned status code: ${response.status}`);
         })
         .catch(error => console.error("Error getting github user", error));
 }
@@ -85,13 +86,16 @@ function fetchUserGithub(){
 
 function fetchUserAdminStatus() {
     let instanceName = $("#instance-accordion").find(".bx--accordion__title").text();
-    
+
     if (typeof instanceName === "undefined") {
         return;
     }
     return fetch(`/api/kabanero/${instanceName}/admin`)
         .then(function (response) {
-            return response.json();
+            if (response.status !== 200) {
+                return fetchUserGithub()
+            }
+            response.json();
         })
         .then(fetchInstanceAdmins)
         .catch(error => console.error("Error getting stacks", error));

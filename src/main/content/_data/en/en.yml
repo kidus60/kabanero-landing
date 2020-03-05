@@ -150,7 +150,7 @@ instance:
   members: "Members: "
   admins: Admins
   user: User
-  name: Name
+  full-name: Full Name
   email: Email
   manage-admins: Manage Admins
   details: Details

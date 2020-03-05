@@ -159,6 +159,6 @@ function setOAuth(oauthJSON) {
         let selectedInstance = $("#selected-instance-name").text().trim();
         $("#stacks-oauth-msg").text("Manage Stacks");
         $("#stacks-link").attr("href", `/instance/stacks?name=${selectedInstance}`);
-        fetchUserGithub();
+        fetchUserAdminStatus();
     }
 }
