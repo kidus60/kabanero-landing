@@ -117,17 +117,17 @@ function updateAdminView(adminsListJson){
         return;
     }
     adminsListJson.forEach(user => {
-        let githubAdminFirstName = user.name.split(" ")[0];
-        let githubAdminLastName = user.name.split(" ")[1];
+        let githubAdminUsername = user.login;
+        let githubAdminFullName = user.name == null ? "Unavailable" : user.name;
         let githubAdminEmail = user.email == null ? "Unavailable" : user.email;
 
         let box = $("#instance-admin-list-notification-template").clone().removeAttr("id").removeClass("hidden");
-        $(box).find("#github-admin-modal-first-name").text(githubAdminFirstName);
-        $(box).find("#github-admin-modal-last-name").text(githubAdminLastName);
+        $(box).find("#github-admin-modal-first-name").text(githubAdminUsername);
+        $(box).find("#github-admin-modal-last-name").text(githubAdminFullName);
         $(box).find("#github-admin-modal-email").text(githubAdminEmail);
         
         $("#admin-modal-content").append(box);
-        $("#instance-accordion-admins-list").append(`<span class="instance-admin-names">${githubAdminFirstName}<span>`);
+        $("#instance-accordion-admins-list").append(`<span class="instance-admin-names">${githubAdminUsername}<span>`);
     });
     $("#instance-accordion-admin-view").show();
 }

@@ -196,13 +196,14 @@ button:disabled > .arrow-container > svg{
 }
 
 .modal-content-user-info{
-    width: 13rem;
+    width: 10rem;
 }
 
 .instance-inline-admin-list-notification{
     background-color: white;
     color: black;
     border: solid .02px black;
+    width: 100%;
 }
 
 .modal-content-inline-close-button{
@@ -215,5 +216,13 @@ button:disabled > .arrow-container > svg{
 
 .bx--inline-notification__text-wrapper{
     padding: 0 !important;
-    flex-wrap: unset !important;
+}
+
+#modal-column-headings{
+    padding-left: 3rem;
+    font-weight: 500;
+}
+
+#admin-modal-content{
+    padding: 1px 50px 0px 50px !important;
 }

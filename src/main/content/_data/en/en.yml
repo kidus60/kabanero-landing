@@ -149,6 +149,9 @@ instance:
   date-created: "Date created: "
   members: "Members: "
   admins: Admins
+  user: User
+  name: Name
+  email: Email
   manage-admins: Manage Admins
   details: Details
   modal-confirmation-header: Confirmation

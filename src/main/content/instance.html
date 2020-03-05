@@ -194,7 +194,17 @@ permalink: /instance/
                 </svg>
             </button>
         </div>
-        <div id="admin-modal-content" class="bx--modal-content"></div>
+        <div id="admin-modal-content" class="bx--modal-content">
+            <div data-notification class="bx--inline-notification">
+                <div id="modal-column-headings" class="bx--inline-notification__details instance-inline-admin-list-notification">
+                    <div class="bx--inline-notification__text-wrapper">
+                        <div class="modal-content-user-info">{{t.instance.user}}</div>
+                        <div class="modal-content-user-info">{{t.instance.name}}</div>
+                        <div class="modal-content-user-info">{{t.instance.email}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="bx--modal-content--overflow-indicator"></div>
         <div class="bx--modal-footer">
             <button class="bx--btn bx--btn--secondary" type="button"
