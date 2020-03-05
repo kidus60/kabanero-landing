@@ -153,6 +153,7 @@ instance:
   full-name: Full Name
   email: Email
   manage-admins: Manage Admins
+  teams: Teams
   details: Details
   modal-confirmation-header: Confirmation
   modal-content: "Are you sure you want to deactivate the stack:"

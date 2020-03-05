@@ -204,17 +204,14 @@ button:disabled > .arrow-container > svg{
     color: black;
     border: solid .02px black;
     width: 100%;
+    text-align: center;
 }
 
 .modal-content-inline-close-button{
     fill: black !important;
 }
 
-.bx--inline-notification__close-button{
-    cursor:  unset !important;
-}
-
-.bx--inline-notification__text-wrapper{
+.admin-list-modal-template{
     padding: 0 !important;
 }
 
@@ -223,6 +220,35 @@ button:disabled > .arrow-container > svg{
     font-weight: 500;
 }
 
+
 #admin-modal-content{
     padding: 1px 50px 0px 50px !important;
+}
+
+.remove-admin-tooltip{
+    width: 9rem !important
+}
+
+.admin-modal-accordion-content{
+        padding-right: unset !important;
+}
+
+.admin-modal-accordion-title{
+    text-align: center;
+}
+
+.modal-accordion-li{
+    height: 3.5em;
+}
+
+.add-member-icon-container{
+    text-align: center;
+    border: 1px solid black;
+    display: inherit !important;
+}
+
+.add-member-svg-icon{
+    height: 25px;
+    width: 25px;
+    cursor: pointer;
 }

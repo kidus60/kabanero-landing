@@ -30,6 +30,16 @@ $(document).ready(function () {
         fetchAnInstance(newName)
             .then(loadAllInfo);
     });
+
+    $("#modal-teams-li-template li").on("click", e => {
+        $(this).toggleClass("bx--accordion__item--active");
+    });
+    
+    $(".delete-admin-button").on("click", e => {
+        let teamId = $(e.target).closest(".bx--accordion__item").find(".admin-modal-accordion-title").attr("teamId");
+        let githubUsername = $(e.target).closest(".instance-inline-admin-list-notification").find(".github-admin-modal-username").text();
+        removeTeamMember(teamId, githubUsername);
+    });
 });
 
 function setListeners() {
@@ -97,14 +107,14 @@ function setToolData(tools) {
     $(".bx--inline-loading").hide();
 }
 
-function setInstanceCard(instanceJSON) {
+function setInstanceCard(instanceJSON) {    
     let repos = instanceJSON.spec.stacks ? instanceJSON.spec.stacks.repositories : [];
     let cliURL = instanceJSON.status.cli.hostnames[0];
 
     // Instance Details
     let $instanceDetails = $("#repo-section");
     repos.forEach(repo => {
-        $instanceDetails.append(createRepositorySection(repo.name, repo.https.url));
+        $instanceDetails.append(createRepositorySection("", ""));
     });
 
     $("#instance-details-card #management-cli").val(cliURL).attr("title", cliURL);
@@ -159,6 +169,6 @@ function setOAuth(oauthJSON) {
         let selectedInstance = $("#selected-instance-name").text().trim();
         $("#stacks-oauth-msg").text("Manage Stacks");
         $("#stacks-link").attr("href", `/instance/stacks?name=${selectedInstance}`);
-        fetchUserAdminStatus();
+        fetchUserAdminStatus();   
     }
 }

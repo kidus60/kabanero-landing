@@ -21,7 +21,9 @@ package io.kabanero.api;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.ApplicationPath;
@@ -142,17 +144,28 @@ public class InstanceEndpoints extends Application {
 
         String instanceGithubOrg = instance.getSpec().getGithub().getOrganization();
         TeamService teamService = new TeamService(client);
+
+        Map<Team, List<User>> map = new HashMap<Team, List<User>>();
         List<User> instanceAdmins = new ArrayList<>();
+        Map<String, Object> body = new HashMap<>();
 
         for (Team orgTeam : teamService.getTeams(instanceGithubOrg)) {
+            List<User> orgTeamMembers = new ArrayList<>();
+
             for (User instanceTeamMember : teamService.getMembers(orgTeam.getId())) {
-                if(!instanceAdmins.stream().filter(member -> instanceTeamMember.getLogin().contains(member.getLogin())).findAny().isPresent()) {
+                orgTeamMembers.add(new UserService(client).getUser(instanceTeamMember.getLogin()));
+                map.put(orgTeam, orgTeamMembers);
+
+                if (!instanceAdmins.stream().filter(member -> instanceTeamMember.getLogin().contains(member.getLogin())).findAny().isPresent()) {
                     instanceAdmins.add(new UserService(client).getUser(instanceTeamMember.getLogin()));
                 }
             }
         }
 
-        return Response.ok(instanceAdmins).build();
+        body.put("instanceGithubOrgDetails", map);
+        body.put("instanceAdmins", instanceAdmins);
+
+        return Response.ok(body).build();
     }
 
     @GET
