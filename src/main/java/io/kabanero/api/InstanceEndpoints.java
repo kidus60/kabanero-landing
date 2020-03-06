@@ -35,7 +35,9 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import com.ibm.websphere.security.social.UserProfile;
 import com.ibm.websphere.security.social.UserProfileManager;
 
@@ -94,7 +96,7 @@ public class InstanceEndpoints extends Application {
     }
 
     @GET
-    @Path("{instanceName}/admin")
+    @Path("{instanceName}/isAdmin")
     @Produces(MediaType.APPLICATION_JSON)
     public Response isAdmin(@PathParam("instanceName") String instanceName) throws IOException, ApiException, GeneralSecurityException {
         UserProfile userProfile = UserProfileManager.getUserProfile();
@@ -129,7 +131,7 @@ public class InstanceEndpoints extends Application {
     }
 
     @GET
-    @Path("{instanceName}/admin/list")
+    @Path("{instanceName}/admin")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAdminList(@PathParam("instanceName") String instanceName) throws IOException, ApiException, GeneralSecurityException {
         UserProfile userProfile = UserProfileManager.getUserProfile();
@@ -143,26 +145,38 @@ public class InstanceEndpoints extends Application {
         }
 
         String instanceGithubOrg = instance.getSpec().getGithub().getOrganization();
+        List<String> instanceGithubTeams = instance.getSpec().getGithub().getTeams();
+
+        List<Object> instanceTeamMembers = new ArrayList<>();
+        List<User> allInstanceAdmins = new ArrayList<>();
+
         TeamService teamService = new TeamService(client);
 
-        Map<Object, List<User>> orgTeamAndMemebers = new HashMap<Object, List<User>>();
-        List<User> instanceAdmins = new ArrayList<>();
-
+        // Loop though all teams in the Kabanero CRD orginization and check to if the team exists in the list of Kabanero crd teams
         for (Team orgTeam : teamService.getTeams(instanceGithubOrg)) {
-            List<User> orgTeamMembers = new ArrayList<>();            
-            for (User instanceTeamMember : teamService.getMembers(orgTeam.getId())) {
-                orgTeamMembers.add(new UserService(client).getUser(instanceTeamMember.getLogin()));
-                orgTeamAndMemebers.put(orgTeam, orgTeamMembers);
-
-                if (!instanceAdmins.stream().filter(member -> instanceTeamMember.getLogin().contains(member.getLogin())).findAny().isPresent()) {
-                    instanceAdmins.add(new UserService(client).getUser(instanceTeamMember.getLogin()));
+            for (String instanceAdminTeam : instanceGithubTeams) {
+                if (instanceAdminTeam.equals(orgTeam.getName())) {
+                    // If the team exits in the CRD create an object with the team name, id and a
+                    // list of memebrs that belong to the team
+                    JsonObject teamObject = new JsonObject();
+                    teamObject.addProperty("name", orgTeam.getName());
+                    teamObject.addProperty("id", orgTeam.getId());
+                    teamObject.add("members", new Gson().toJsonTree(teamService.getMembers(orgTeam.getId()), new TypeToken<List<User>>() {}.getType()));
+                    instanceTeamMembers.add(teamObject);
+                    // Loop through each team and get all members that belong to that team make sure
+                    // they dont alreay exist in the list of all admins and add the user.
+                    for (User member : teamService.getMembers(orgTeam.getId())) {
+                        if (!allInstanceAdmins.stream().anyMatch(admin -> member.getLogin().equals(admin.getLogin()))) {
+                            allInstanceAdmins.add(member);
+                        }
+                    }
                 }
             }
         }
 
         Map<String, Object> body = new HashMap<>();
-        body.put("instanceGithubOrgDetails", orgTeamAndMemebers);
-        body.put("instanceAdmins", instanceAdmins);
+        body.put("instanceTeams", instanceTeamMembers);
+        body.put("instanceAdmins", allInstanceAdmins);
 
         return Response.ok(body).build();
     }

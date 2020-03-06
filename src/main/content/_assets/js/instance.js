@@ -32,13 +32,7 @@ $(document).ready(function () {
     });
 
     $("#modal-teams-li-template li").on("click", e => {
-        $(this).toggleClass("bx--accordion__item--active");
-    });
-    
-    $(".delete-admin-button").on("click", e => {
-        let teamId = $(e.target).closest(".bx--accordion__item").find(".admin-modal-accordion-title").attr("teamId");
-        let githubUsername = $(e.target).closest(".instance-inline-admin-list-notification").find(".github-admin-modal-username").text();
-        removeTeamMember(teamId, githubUsername);
+        $(e.target).toggleClass("bx--accordion__item--active");
     });
 });
 

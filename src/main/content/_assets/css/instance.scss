@@ -25,6 +25,7 @@
 "../../../../../node_modules/carbon-components/scss/components/notification/inline-notification"; 
 //declare variables
 $color-ibm:#3d70b2;
+$kabanero-color: #C43804;
 
 body{
     background-color:$ui-background;
@@ -251,4 +252,9 @@ button:disabled > .arrow-container > svg{
     height: 25px;
     width: 25px;
     cursor: pointer;
+}
+
+.remove-user-error-notification{
+    padding-left: 1em;
+    padding-right: 1em;
 }

@@ -77,7 +77,7 @@ function fetchUserAdminStatus() {
     if (typeof instanceName === "undefined") {
         return;
     }
-    return fetch(`/api/kabanero/${instanceName}/admin`)
+    return fetch(`/api/kabanero/${instanceName}/isAdmin`)
         .then(function (response) {
             return response.json();
         })
@@ -93,7 +93,7 @@ function fetchInstanceAdmins(isAdmin){
         return;
     }
     
-    return fetch(`/api/kabanero/${instanceName}/admin/list`)
+    return fetch(`/api/kabanero/${instanceName}/admin`)
         .then(function (response) {
             return response.json();
         })
@@ -101,37 +101,57 @@ function fetchInstanceAdmins(isAdmin){
         .catch(error => console.error("Error getting stacks", error));
 }
 
-function removeTeamMember(teamId, githubAdminUsername) {
-    if (typeof teamId === "undefined" || typeof githubAdminUsername === "undefined") {
+function fetchGithubUserDetails(githubUsername){
+    if (!githubUsername || githubUsername == null) {
         return;
     }
-    return fetch(`/api/auth/git/team/${teamId}/member/${githubAdminUsername}`)
+    return fetch(`/api/auth/git/user/${githubUsername}/details`)
         .then(function (response) {
-            return response.json();
+            return response.json()
         })
-        .then(fetchInstanceAdmins)
-        .catch(error => console.error(`Error deleting github user ${githubAdminUsername}` , error));
-}
+        .then(data => {
+            return data;
+        })
+        .catch(error => console.error(`Permission denied or user ${githubUsername} doesn’t exist`, error));
+    }
 
-function addTeamMember(teamId, githubAdminUsername) {
-    if (typeof teamId === "undefined" || typeof githubAdminUsername === "undefined") {
+function removeTeamMember(target) {
+    let teamId = $(target).closest(".bx--accordion__item").find(".admin-modal-accordion-title").attr("teamId");
+    let teamName = $(target).closest(".bx--accordion__item").find(".admin-modal-accordion-title").text();
+    let githubUsername = $(target).closest(".instance-inline-admin-list-notification").find(".github-admin-modal-username").text();
+
+    if (typeof teamId === "undefined" || typeof githubUsername === "undefined") {
         return;
     }
-    return fetch(`/api/auth/git/team/${teamId}/member/${githubAdminUsername}`)
+    return fetch(`/api/auth/git/team/${teamId}/member/${githubUsername}`, { method: 'DELETE', })
         .then(function (response) {
-            return response.json();
+            return response.json()
         })
-        .then(fetchInstanceAdmins)
-        .catch(error => console.error(`Error deleting github user ${githubAdminUsername}`, error));
+        .then(data => {
+            if (data.msg.includes("404")) {
+                let inlineNotification = $(target).closest(".bx--accordion__content");
+                inlineNotification.find(".remove-user-error-notification").removeClass("hidden");
+                inlineNotification.find(".remove-user-error-notification-content").empty();
+                inlineNotification.find(".remove-user-error-notification-content").text(`Permission denied or user ${githubUsername} doesn’t exist in team ${teamName}`);
+                return;
+            }
+            else{
+                fetchUserAdminStatus();
+            }
+        })
+        .catch(error => console.error(`Permission denied or user ${githubUsername} doesn’t exist`, error));
 }
 
 function updateInstanceAdminView(adminsListJson){
     if (!adminsListJson || adminsListJson == null) {
         return;
     }
+
+    $("#instance-accordion-admins-list").empty();
+    $("#admin-modal-list").empty();
     
     let instanceAdmins = adminsListJson.instanceAdmins ? adminsListJson.instanceAdmins : [];
-    let orgTeams = adminsListJson.instanceGithubOrgDetails ? adminsListJson.instanceGithubOrgDetails : [];
+    let instanceTeams = adminsListJson.instanceTeams ? adminsListJson.instanceTeams : [];
 
     instanceAdmins.forEach(user => {
         let githubAdminUsername = user.login;
@@ -139,27 +159,44 @@ function updateInstanceAdminView(adminsListJson){
         $("#instance-accordion-admin-view").removeClass("hidden");
     });
 
-    orgTeams.forEach(team => {
-        let row = $("#modal-teams-li-template").clone().removeAttr("id").removeClass("hidden");
-        $(row).find(".admin-modal-accordion-title").text(team[0].name).attr("teamId", team[0].id);
+    instanceTeams.forEach(team => {
+        let teamMembers = team.members ? team.members : [];
 
-        team[1].forEach(member => {
-            let githubAdminUsername = member.login;
-            let githubAdminFullName = member.name == null ? "Unavailable" : member.name;
-            let githubAdminEmail = member.email == null ? "Unavailable" : member.email;
+        if (teamMembers.length === 0) {
+            return;
+        }
+        
+        let row = $("#modal-teams-li-template").clone().removeAttr("id").removeClass("hidden");
+        $(row).find(".admin-modal-accordion-title").text(team.name).attr("teamId", team.id);
+
+        teamMembers.forEach(member => {
+            let userDetails = fetchGithubUserDetails(member.login);
+            let userLogin = userDetails.login;
+            let userFullName = userDetails.name == null ? "Unavailable" : userDetails.name;
+            let userEmail = userDetails.email == null ? "Unavailable" : userDetails.email;
 
             let userInfoBox = $("#instance-admin-list-notification-template").clone().removeAttr("id").removeClass("hidden");
-            $(userInfoBox).find(".github-admin-modal-username").text(githubAdminUsername);
-            $(userInfoBox).find(".github-admin-modal-full-name").text(githubAdminFullName);
-            $(userInfoBox).find(".github-admin-modal-email").text(githubAdminEmail);
+            $(userInfoBox).find(".github-admin-modal-username").text(userLogin);
+            $(userInfoBox).find(".github-admin-modal-full-name").text(userFullName);
+            $(userInfoBox).find(".github-admin-modal-email").text(userEmail);
 
             $(row).find(".admin-modal-accordion-content").append(userInfoBox)
-            $(userInfoBox).find(".bx--assistive-text").text(`Remove ${githubAdminUsername} from ${team[0].name} team`)
+            $(userInfoBox).find(".bx--assistive-text").text(`Remove ${userLogin} from ${team.name} team`)
         });
        
         $("#admin-modal-list").append(row);
     })
+
+    $("#admin-modal-list .remove-user-button").on("click", e => {
+        removeTeamMember(e.target);
+    });
+
+    $(".bx--inline-notification__close-button").on("click", e => {
+        $(e.target).closest(".bx--accordion__content").find(".remove-user-error-notification").addClass("hidden");;
+    }); 
+
 }
+
 
 let ToolPane = class {
     constructor(label, location, paneText, buttonText, https) {
@@ -323,7 +360,7 @@ let InstancePane = class {
 };
 
 // Set each instance name in the accordion selection and returns the instance name to be loaded
-function setInstanceSelections(instancesJSON) {
+function setInstanceSelections(instancesJSON) {    
     let instances = instancesJSON.items;
     if (typeof instances === "undefined" || instances.length === 0) {
         $("#instance-accordion #error-li").show();
