@@ -131,7 +131,7 @@ public class InstanceEndpoints extends Application {
     @GET
     @Path("{instanceName}/admin/list")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAdminLis(@PathParam("instanceName") String instanceName) throws IOException, ApiException, GeneralSecurityException {
+    public Response getAdminList(@PathParam("instanceName") String instanceName) throws IOException, ApiException, GeneralSecurityException {
         UserProfile userProfile = UserProfileManager.getUserProfile();
         String token = userProfile.getAccessToken();
         GitHubClient client = new GitHubClient();
@@ -145,16 +145,14 @@ public class InstanceEndpoints extends Application {
         String instanceGithubOrg = instance.getSpec().getGithub().getOrganization();
         TeamService teamService = new TeamService(client);
 
-        Map<Team, List<User>> map = new HashMap<Team, List<User>>();
+        Map<Object, List<User>> orgTeamAndMemebers = new HashMap<Object, List<User>>();
         List<User> instanceAdmins = new ArrayList<>();
-        Map<String, Object> body = new HashMap<>();
 
         for (Team orgTeam : teamService.getTeams(instanceGithubOrg)) {
-            List<User> orgTeamMembers = new ArrayList<>();
-
+            List<User> orgTeamMembers = new ArrayList<>();            
             for (User instanceTeamMember : teamService.getMembers(orgTeam.getId())) {
                 orgTeamMembers.add(new UserService(client).getUser(instanceTeamMember.getLogin()));
-                map.put(orgTeam, orgTeamMembers);
+                orgTeamAndMemebers.put(orgTeam, orgTeamMembers);
 
                 if (!instanceAdmins.stream().filter(member -> instanceTeamMember.getLogin().contains(member.getLogin())).findAny().isPresent()) {
                     instanceAdmins.add(new UserService(client).getUser(instanceTeamMember.getLogin()));
@@ -162,7 +160,8 @@ public class InstanceEndpoints extends Application {
             }
         }
 
-        body.put("instanceGithubOrgDetails", map);
+        Map<String, Object> body = new HashMap<>();
+        body.put("instanceGithubOrgDetails", orgTeamAndMemebers);
         body.put("instanceAdmins", instanceAdmins);
 
         return Response.ok(body).build();

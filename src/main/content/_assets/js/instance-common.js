@@ -136,7 +136,7 @@ function updateInstanceAdminView(adminsListJson){
     instanceAdmins.forEach(user => {
         let githubAdminUsername = user.login;
         $("#instance-accordion-admins-list").append(`<span class="instance-admin-names">${githubAdminUsername}<span>`);
-        $("#instance-accordion-admin-view").show();
+        $("#instance-accordion-admin-view").removeClass("hidden");
     });
 
     orgTeams.forEach(team => {
