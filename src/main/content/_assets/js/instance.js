@@ -31,9 +31,6 @@ $(document).ready(function () {
             .then(loadAllInfo);
     });
 
-    $("#modal-teams-li-template li").on("click", e => {
-        $(e.target).toggleClass("bx--accordion__item--active");
-    });
 });
 
 function setListeners() {

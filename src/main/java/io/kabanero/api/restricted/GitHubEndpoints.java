@@ -64,7 +64,7 @@ public class GitHubEndpoints extends Application {
     }
 
     @GET
-    @Path("/user/{github_username}/details")
+    @Path("/user/{github_username}")
     @Produces(MediaType.APPLICATION_JSON)
     public User getUserDetails(@PathParam("instanceName") String instanceName, @PathParam("github_username") String githubUsername) throws IOException, ApiException, GeneralSecurityException {
         UserProfile userProfile = UserProfileManager.getUserProfile();

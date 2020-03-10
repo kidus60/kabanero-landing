@@ -147,38 +147,24 @@ public class InstanceEndpoints extends Application {
         String instanceGithubOrg = instance.getSpec().getGithub().getOrganization();
         List<String> instanceGithubTeams = instance.getSpec().getGithub().getTeams();
 
-        List<Object> instanceTeamMembers = new ArrayList<>();
-        List<User> allInstanceAdmins = new ArrayList<>();
+        List<Object> adminMembers = new ArrayList<>();
 
         TeamService teamService = new TeamService(client);
 
         // Loop though all teams in the Kabanero CRD orginization and check to if the team exists in the list of Kabanero crd teams
         for (Team orgTeam : teamService.getTeams(instanceGithubOrg)) {
-            for (String instanceAdminTeam : instanceGithubTeams) {
-                if (instanceAdminTeam.equals(orgTeam.getName())) {
+                if (instanceGithubTeams.contains(orgTeam.getName())) {
                     // If the team exits in the CRD create an object with the team name, id and a
                     // list of memebrs that belong to the team
                     JsonObject teamObject = new JsonObject();
                     teamObject.addProperty("name", orgTeam.getName());
                     teamObject.addProperty("id", orgTeam.getId());
                     teamObject.add("members", new Gson().toJsonTree(teamService.getMembers(orgTeam.getId()), new TypeToken<List<User>>() {}.getType()));
-                    instanceTeamMembers.add(teamObject);
-                    // Loop through each team and get all members that belong to that team make sure
-                    // they dont alreay exist in the list of all admins and add the user.
-                    for (User member : teamService.getMembers(orgTeam.getId())) {
-                        if (!allInstanceAdmins.stream().anyMatch(admin -> member.getLogin().equals(admin.getLogin()))) {
-                            allInstanceAdmins.add(member);
-                        }
-                    }
+                    adminMembers.add(teamObject);
                 }
-            }
         }
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("instanceTeams", instanceTeamMembers);
-        body.put("instanceAdmins", allInstanceAdmins);
-
-        return Response.ok(body).build();
+        return Response.ok(adminMembers).build();
     }
 
     @GET

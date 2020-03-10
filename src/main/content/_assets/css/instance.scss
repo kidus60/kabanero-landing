@@ -258,3 +258,8 @@ button:disabled > .arrow-container > svg{
     padding-left: 1em;
     padding-right: 1em;
 }
+
+.bx--modal-close:focus, .modal-content-inline-close-button:focus{
+    outline: none !important;
+    border-color: #ffffff !important; 
+}
