@@ -106,7 +106,9 @@ index:
       eclipseInstall: Codewind from the Eclipse Marketplace
       cli: Optionally, install the command line tool
       codeready: If using CodeReady IDE
-      codereadyInstall: CodeReady IDE
+      follow-steps: Follow steps for 
+      codereadyInstall: Installing Codewind in CodeReady Workspaces
+      go-to-codeready: Go to CodeReady
       appsody: Appsody CLI
       appsodyRepoAdd: appsody repo add command
       stackHub: Configure Appsody / Codewind to point at your Kabanero Stack Hub. Get your Stack Hub URL from your
@@ -151,11 +153,15 @@ instance:
   date-created: "Date created: "
   members: "Members: "
   admins: Admins
+  username: Username
   user: User
   full-name: Full Name
   email: Email
+  add-user: Add new user to
+  add-member: Add member
   manage-admins: Manage Admins
   teams: Teams
+  team: team
   details: Details
   modal-confirmation-header: Confirmation
   modal-content: "Are you sure you want to deactivate the stack:"
