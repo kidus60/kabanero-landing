@@ -105,11 +105,15 @@ index:
       eclipse: If using Eclipse IDE
       eclipseInstall: Codewind from the Eclipse Marketplace
       cli: Optionally, install the command line tool
+      codeready: If using CodeReady IDE
+      follow-steps: Follow steps for 
+      codereadyInstall: Installing Codewind in CodeReady Workspaces
+      go-to-codeready: Go to CodeReady
       appsody: Appsody CLI
       appsodyRepoAdd: appsody repo add command
       stackHub: Configure Appsody / Codewind to point at your Kabanero Stack Hub. Get your Stack Hub URL from your
       teamInstance: team instance page.
-      configTemplateSources: Configuring template sources for
+      configTemplateSources: Adding your own template sources to Codewind
       setStackHub: To set your stack hub url, follow the instructions associated with the tool you are using
     check: You can check out our guide and video on creating your first application.
     guide: guide

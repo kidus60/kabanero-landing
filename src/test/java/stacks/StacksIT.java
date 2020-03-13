@@ -58,15 +58,7 @@ public class StacksIT {
     }
 
     @Test
-    public void hasCorrectStacksApiVersion() {
-        String expectedApiVerson = "0.6.0";
-        String actualApiVersion = driver.findElement(By.id("cli-version")).getText();
-
-        assertEquals("has correct stacks API version", expectedApiVerson, actualApiVersion);
-    }
-
-    @Test
-    public void stacksTableHasCorrectNumberOfHeadersIT() {
+    public void hasCorrectNumStackHeadersIT() {
         WebElement table = driver.findElement(By.id("stack-table"));
         List<WebElement> tableHeaders = table.findElements(By.tagName("th"));
 
@@ -77,7 +69,7 @@ public class StacksIT {
     }
 
     @Test
-    public void stacksTableHasCorrectHeadersIT() {
+    public void hasCorrectStackHeadersIT() {
         WebElement table = driver.findElement(By.id("stack-table"));
         List<WebElement> tableHeaders = table.findElements(By.tagName("th"));
 
@@ -89,21 +81,21 @@ public class StacksIT {
         String actualSecondHeader = tableHeaders.get(1).getText();
         String actualThirdHeader = tableHeaders.get(2).getText();
 
-        assertEquals("has correct stacks table header", expectedFirstHeader, actualFirstHeader);
-        assertEquals("has correct stacks table header", expectedSecondHeader, actualSecondHeader);
-        assertEquals("has correct stacks table header", expectedThirdHeader, actualThirdHeader);
+        assertEquals("has first correct stacks table header", expectedFirstHeader, actualFirstHeader);
+        assertEquals("has second correct stacks table header", expectedSecondHeader, actualSecondHeader);
+        assertEquals("has third correct stacks table header", expectedThirdHeader, actualThirdHeader);
 
     }
 
     @Test
-    public void stacksTableHasCorrectNumberOfRowsIT() {
+    public void hasCorrectNumStackRowsIT() {
         int expectedNumberOfStacks = 5;
-        int actualNumberOfStacks = numberOfTableRows("stack-table-body");
-        assertEquals("stacks table has correct table rows", expectedNumberOfStacks, actualNumberOfStacks);
+        int actualNumberOfStacks = getNumTableRow("stack-table-body");
+        assertEquals("stacks table has correct number of table rows", expectedNumberOfStacks, actualNumberOfStacks);
     }
 
     @Test
-    public void curatedStacksTableHasCorrectNumberOfHeadersIT() {
+    public void hasCorrectNumCuratedStacksHeadersIT() {
         WebElement table = driver.findElement(By.id("curated-stack-table"));
         List<WebElement> tableHeaders = table.findElements(By.tagName("th"));
 
@@ -114,7 +106,7 @@ public class StacksIT {
     }
 
     @Test
-    public void curatedSstacksTableHasCorrectHeadersIT() {
+    public void hasCorrectCuratedStackHeadersIT() {
         WebElement table = driver.findElement(By.id("curated-stack-table"));
         List<WebElement> tableHeaders = table.findElements(By.tagName("th"));
 
@@ -126,21 +118,21 @@ public class StacksIT {
         String actualSecondHeader = tableHeaders.get(1).getText();
         String actualThirdHeader = tableHeaders.get(2).getText();
 
-        assertEquals("has correct curated stacks table header", expectedFirstHeader, actualFirstHeader);
-        assertEquals("has correct curated stacks table header", expectedSecondHeader, actualSecondHeader);
-        assertEquals("has correct curated stacks table header", expectedThirdHeader, actualThirdHeader);
+        assertEquals("has first correct curated stacks table header", expectedFirstHeader, actualFirstHeader);
+        assertEquals("has second correct curated stacks table header", expectedSecondHeader, actualSecondHeader);
+        assertEquals("has third correct curated stacks table header", expectedThirdHeader, actualThirdHeader);
 
     }
 
     @Test
     public void curatedStacksTableHasCorrectNumberOfStacksIT() {
         int expectedNumberOfCuratedStacks = 5;
-        int actualNumberOfCuratedStacks = numberOfTableRows("curated-stack-table-body");
+        int actualNumberOfCuratedStacks = getNumTableRow("curated-stack-table-body");
         assertEquals("curated stacks table has correct table rows", expectedNumberOfCuratedStacks,
                 actualNumberOfCuratedStacks);
     }
 
-    public int numberOfTableRows(String tableId) {
+    public int getNumTableRow(String tableId) {
         WebElement tableBody = driver.findElement(By.id(tableId));
         List<WebElement> tableRows = tableBody.findElements(By.tagName("tr"));
 
