@@ -125,7 +125,7 @@ public class StacksIT {
     }
 
     @Test
-    public void curatedStacksTableHasCorrectNumberOfStacksIT() {
+    public void hasCorrectNumCuratedStacksIT() {
         int expectedNumberOfCuratedStacks = 5;
         int actualNumberOfCuratedStacks = getNumTableRow("curated-stack-table-body");
         assertEquals("curated stacks table has correct table rows", expectedNumberOfCuratedStacks,
