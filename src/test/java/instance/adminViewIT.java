@@ -1,5 +1,6 @@
 package instance;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
@@ -55,16 +56,15 @@ public class adminViewIT {
     }
 
     @Test
-    public void isNotAdminIt(){
+    public void doesNotShowAdminList(){
         js.executeScript("fetchInstanceAdmins({'isAdmin':false});");
         WebElement hiddenAdminList = driver.findElement(By.id("instance-accordion-admin-view"));
-        System.out.print("ssk" + hiddenAdminList.getText());
 
         assertEquals("hides accordion admin list from non-admin", false, hiddenAdminList.isDisplayed());
     }
 
     @Test
-    public void isAdminIt() throws IOException {
+    public void doesShowAdminList() throws IOException {
         String adminMembersJSON = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "/adminJsons/adminMembers.json")), StandardCharsets.UTF_8);
         js.executeScript("fetchInstanceAdmins({isAdmin:true});");
         js.executeScript("updateInstanceAdminView(JSON.parse(arguments[0]));", adminMembersJSON);
@@ -86,18 +86,14 @@ public class adminViewIT {
     @Test
     public void hasCorrectAdminListIT() throws IOException {
         List<WebElement> adminList = driver.findElements(By.className("instance-admin-names"));
+        String[] expectedAdminsArray = {"alohr51", "kSee04", "kidus60"};
+        String[] actualAdminsArray = new String[adminList.size()];
 
-        String expectedFirstAdmin = "alohr51";
-        String expectedSecondAdmin = "kSee04";
-        String expectedThirdAdmin = "kidus60";
+        for(WebElement admin: adminList){
+            actualAdminsArray[adminList.indexOf(admin)] = admin.getText();
+        }
 
-        String actualFirstAdmin = adminList.get(0).getText();
-        String actualSecondAdmin = adminList.get(1).getText();
-        String actualThirdAdmin = adminList.get(2).getText();
-
-        assertEquals("has first correct admin login", expectedFirstAdmin, actualFirstAdmin);
-        assertEquals("has second correct admin login", expectedSecondAdmin, actualSecondAdmin);
-        assertEquals("has third correct admin login", expectedThirdAdmin, actualThirdAdmin);
+        assertArrayEquals("has first correct admin login", expectedAdminsArray, actualAdminsArray);
     }
 
     @Test
@@ -117,7 +113,8 @@ public class adminViewIT {
 
     @Test
     public void hasCorrectNumTeamIT() throws IOException {
-        List<WebElement> adminList = driver.findElements(By.xpath("//*[@id='admin-modal-list']/li"));
+        WebElement adminsModal = driver.findElement(By.id("admin-modal-list"));
+        List<WebElement> adminList = adminsModal.findElements(By.tagName("li"));
         int expectedNumAdmins = 1;
         int actualNumAdmins = adminList.size();
 
@@ -126,7 +123,8 @@ public class adminViewIT {
 
     @Test
     public void hasCorrectNumModalHeaders() throws IOException {
-        List<WebElement> adminList = driver.findElements(By.xpath("//*[@id='admin-modal-list']/li"));
+        WebElement adminsModal = driver.findElement(By.id("admin-modal-list"));
+        List<WebElement> adminList = adminsModal.findElements(By.tagName("li"));
         List<WebElement> headers =  adminList.get(0).findElements(By.className("modal-content-user-info"));
 
         int expectedNumHeaders = 3;
@@ -138,7 +136,8 @@ public class adminViewIT {
 
     @Test
     public void hasCorrectModalHeaders() throws IOException {
-        List<WebElement> adminList = driver.findElements(By.xpath("//*[@id='admin-modal-list']/li"));
+        WebElement adminsModal = driver.findElement(By.id("admin-modal-list"));
+        List<WebElement> adminList = adminsModal.findElements(By.tagName("li"));
         adminList.get(0).click();
 
         List<WebElement> headers = adminList.get(0).findElements(By.className("modal-content-user-info"));
