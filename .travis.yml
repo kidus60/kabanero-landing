@@ -12,7 +12,7 @@ stages:
 
 jobs:
   include:
-    - stage: "Running tests"
+    - stage: "Running tests"  
       name: "Running lint testing and building website with Jekyll"
       script:
         - ./travis/docker_run.sh "./node_modules/.bin/eslint src/main/content/_assets/js/*.js"
