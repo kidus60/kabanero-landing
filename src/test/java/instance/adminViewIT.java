@@ -45,7 +45,7 @@ public class adminViewIT {
         String multiInstanceJSON = new String(Files.readAllBytes(Paths.get("src", "test", "resources", "multipleInstances.json")), StandardCharsets.UTF_8);
 
         // execute javascript functions to set mock data
-        js.executeScript("setInstanceSelections(JSON.parse(arguments[0]));", multiInstanceJSON);
+        js.executeScript("setInstancesSelections(JSON.parse(arguments[0]), '');", multiInstanceJSON);
     }
 
     @AfterClass
