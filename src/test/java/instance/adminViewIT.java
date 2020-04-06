@@ -69,8 +69,12 @@ public class adminViewIT {
         js.executeScript("fetchInstanceAdmins({isAdmin:true});");
         js.executeScript("updateInstanceAdminView(JSON.parse(arguments[0]));", adminMembersJSON);
 
-        WebElement accordionAdminList = driver.findElement(By.id("instance-accordion-admin-view"));
+        WebElement instaceAccordion = driver.findElement(By.id("instance-accordion"));
+        List<WebElement> instances  = instaceAccordion.findElements(By.className("accordion-title"));
+        instances.get(0).click();
 
+        WebElement accordionAdminList = driver.findElement(By.id("instance-accordion-admin-view"));
+        
         assertEquals("shows accordion admin list of admins", true, accordionAdminList.isDisplayed());
     }
 
