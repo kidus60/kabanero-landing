@@ -29,6 +29,7 @@ $(document).ready(function(){
         let newName = handleInstanceSelection($btn);
         fetchAnInstance(newName)
             .then(loadAllInfo);
+
     });
 
     $(".codeready-toggle").on("click", ".bx--toggle__switch", () => {
@@ -517,9 +518,12 @@ function setInstanceModalData(instanceJSON) {
     let instanceName = instanceJSON.metadata.name;
     let codereadyVersion = instanceJSON.spec.codeReadyWorkspaces ? instanceJSON.spec.codeReadyWorkspaces.operator.customResourceInstance.devFileRegistryImage.version : null;
 
-    codereadyVersion ? $("#codeready-modal-version").append(`version: <span id='codeready-version-num'>${codereadyVersion}</span>`) : "";
+    if (codereadyVersion){
+        $("#codeready-modal-version").append(`version: <span id='codeready-version-num'>${codereadyVersion}</span>`);
+    }
+
     $("#codeready-toggle-value").attr("checked", instanceJSON.spec.codeReadyWorkspaces ? instanceJSON.spec.codeReadyWorkspaces.enable : false);
-    $("#modal-instance-name-input").attr("placeholder", instanceName);
+    $("#modal-instance-name-input").val(instanceName);
 
 }
 
@@ -533,14 +537,14 @@ function updateInstance(instanceJSON) {
     instanceJSON.metadata.name = $("#modal-instance-name-input").val();
     instanceJSON.spec.codeReadyWorkspaces.enable = $(".codeready-toggle .bx--toggle__switch")[0].innerText === "Enabled" ? true : false;
 
-    fetch(`/api/kabanero/${instanceName}`,
+    fetch(`/api/auth/kabanero/${instanceName}`,
         {
             method: "PUT",
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ instanceJSON })
+            body: JSON.stringify(instanceJSON)
         })
         .then(loadAllInfo)
         .catch(error => console.error(`Error upadating ${instanceName} instance`, error));
