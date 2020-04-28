@@ -104,7 +104,7 @@ public class adminViewIT {
     public void manageAdminsBtnExists() throws IOException {
         WebElement manageAdminsBtn = driver.findElement(By.id("manage-admins-link"));
 
-        assertEquals("shows accordion admin list of admins ", true, manageAdminsBtn.isDisplayed());
+        assertEquals("shows accordion list of admins ", true, manageAdminsBtn.isDisplayed());
     }
 
     @Test
