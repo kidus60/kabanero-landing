@@ -87,7 +87,7 @@ public class adminViewIT {
         assertEquals("has correct Number of admins", expectedNumAdmins, actualNumAdmins);
     }
 
-    @Test
+    @Test 
     public void hasCorrectAdminListIT() throws IOException {
         List<WebElement> adminList = driver.findElements(By.className("instance-admin-names"));
         String[] expectedAdminsArray = {"alohr51", "kSee04", "kidus60"};
